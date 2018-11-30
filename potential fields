@@ -1,0 +1,186 @@
+maps= loadmap('map_ 2.txt');
+
+% COMMENT THE ABOVE COMMAND, AND UNCOMMENT BELOW COMMAND TO GET MAP 3
+% maps = loadmap('map_ 3.txt')
+
+no_of _obs = size(maps.obstacles,1);
+
+% THE BELOW COMMANDS ARE USED TO GET A SPARSE MAP, UNCOMMENT THEM TO GET A
+% SPARSE MAP
+
+% maps.obstacles = maps.obstacles(1,:)
+% maps.boundary = maps.boundary
+% no_of _obs = size(maps.obstacles,1);
+
+% ENTER YOUR Q_START AND Q_GOAL BELOW:
+
+q_start = [ 0 0 0 0 0 0 ];
+q_goal = [ -pi/2 0 0 pi/4 0  0 ];
+
+eta = 4*10^(8);%  REPULSIVE FIELD STRENGTH
+% USE eta = 4*10^(5) for map_ 3.
+
+rho_not = 200 ; % RADIUS THRESHOLD FOR REPULSIVE FORCE
+
+maps= loadmap('map_ 2.txt');
+
+% COMMENT THE ABOVE COMMAND, AND UNCOMMENT BELOW COMMAND TO GET MAP 3
+% maps = loadmap('map_ 3.txt')
+
+no_of _obs = size(maps.obstacles,1);
+
+% THE BELOW COMMANDS ARE USED TO GET A SPARSE MAP, UNCOMMENT THEM TO GET A
+% SPARSE MAP
+
+% maps.obstacles = maps.obstacles(1,:)
+% maps.boundary = maps.boundary
+% no_of _obs = size(maps.obstacles,1);
+
+% ENTER YOUR Q_START AND Q_GOAL BELOW:
+
+q_start = [ 0 0 0 0 0 0 ];
+q_goal = [ -pi/2 0 0 pi/4 0  0 ];
+
+eta = 4*10^(8);%  REPULSIVE FIELD STRENGTH
+% USE eta = 4*10^(5) for map_ 3.
+
+rho_not = 200 ; % RADIUS THRESHOLD FOR REPULSIVE FORCE
+
+zeta = 50; % ATTRACTIVE FIELD STRENGTH
+
+% UNCOMMENT THE BELOW LINE TO USE A VECTOR OF ZETA, AND UNCOMMENT LINES 76
+% AND 85
+
+% zeta = [100,100,50,5,1,10];
+
+D = 10; % ATTRACTIVE FORCE DISTANCE THRESHOLD
+
+epislon = 5; % ERROR THRESHOLD, CURRENTLY KEPT FOR DISTANCE BASED CHECKING
+% TO USE A CONFIG BASED CHECKING, SET epislon = 0.007
+
+alpha = 0.01; % STEP-SIZE
+
+lynxStart;  % CREATING THE LYNX OBJECT
+
+% calculate end eff position for the q final
+[ pos_eff, ~ ] = calculateFK_sol(q_goal);
+[ pos_start , ~] = calculateFK_sol(q_start);
+ q= q_start;
+ 
+ vprev = 0; % INITIALIZING EXTRA PARAMETERS
+ c=0;
+ t=1;
+
+ % THE BELOW WHILE LOOP CHECKS FOR END-EFFECTOR POSITION ONLY. TO INCLUDE
+ % ALL JOINT ANGLE CHECKING, CHANGE THE LOOP TO "while
+ %norm(q-q_p)>=epislon", with epislon being defined above
+ 
+ while norm(pos_start(6,:) - pos_eff(6, :))>=epislon 
+    
+    tau_ 1 = zeros(6,1);
+    tau_rep1= zeros(6,1);
+    
+    [pos , ~] = calculateFK_sol(q);
+    [pos_r ,~] = calculateFK_sol(q);
+    
+    % RUNNING A LOOP FOR ALL 6 JOINTS,
+    
+  for i = 1 : 6 % for 6 joints
+      Frep= zeros(1,3);
+      Fatt = zeros(1,3);
+      
+      % CALCULATING THE ATTRACTIVE FORCE
+      
+      if norm(pos_eff(i,:) - pos (i,:)) < D  % for a distance lesser than D would be parabolic curve
+            
+            % IF YOU WANT TO USE THE VECTOR OF ZETA, UNCOMMENT THE BELOW
+            % LINE, AND COMMENT THE LINE 78
+            % Fatt = -zeta(i).*( (pos(i, :) - pos_eff( i , :))'); % provide a column with 3
+
+            Fatt = -zeta.*( (pos(i, :) - pos_eff( i , :))');           
+            
+              else  % we need to apply the conic well
+            
+           % IF YOU WANT TO USE THE VECTOR OF ZETA, UNCOMMENT THE BELOW
+            % LINE, AND COMMENT THE LINE 78
+           % Fatt = -D*zeta(i)*((pos(i,:) - pos_eff(i,:))' / norm(pos(i , : ) - pos_eff( i , :)));
+            
+           Fatt = -D*zeta*((pos(i,:) - pos_eff(i,:))' / norm(pos(i , : ) - pos_eff( i , :)));
+           
+      end
+      
+      % CALCULATING THE REPULSIVE FORCE, FOR ALL OBSTACLES
+      
+      for k = 1:no_of _obs
+            
+            % THE distPointToBox IS A CUSTOM DEFINED FUNCTION THAT WE
+            % CREATED, WHICH IS ATTACHED WITH THIS FOLDER. DO NOT USE THE ONE THAT WAS GIVEN AS MATERIAL. 
+            
+            [rhoiq , univec ]  = distPointToBox(pos_r(i,:), maps.obstacles(k,:));
+         
+            if (rhoiq < rho_not )   % for a distance lesser than rho
+
+                deltarho = univec;
+                Frep = Frep + eta*( (1/ rhoiq ) - (1/rho_not)) * ( 1/ (rhoiq)^2) * deltarho ;% passing each force of each joint to calculate torque.
+            end
+      end
+      Frep = Frep' ;
+      tau_ 1 = tau_ 1 + (jacob (q ,i )'*( Fatt + Frep)); % CALCULATING THE TOTAL TORQUE, 
+      % THE ABOVE COMMAND USES ANOTHER FUNCTION "jacob.m" THAT WE CREATED TO
+      % CALCULATE JACOBIANS. 
+  end
+  plotmap(maps);
+  hold on
+  plotLynx(q);
+  
+  % THE BELOW TWO LINES ARE USED TO CREATE THE ATTRACTIVE AND REPULSIVE
+  % FORCES ON THE END-EFFECTOR ON THE PLOT. UNCOMMENT LINE 118 IF YOU WANT
+  % THE ATTRACTIVE FORCES TO SHOW, AND UNCOMMENT LINE 119 IF YOU WANT
+  % REPULSIVE FORCES TO SHOW
+  
+  % quiver3(pos_r(i, 1) , pos_r(i, 2) , pos_r(i,3), 10*Fatt(1), 10*Fatt(2),10*Fatt(3));
+  % quiver3(pos_r(i, 1) , pos_r(i, 2) , pos_r(i,3), 10*Frep(1), 10*Frep(2), 10*Frep(3));
+  text(pos_start(6,1),pos_start(6,2),pos_start(6,3),'.')
+  tau_ 1 = tau_ 1';
+  q_p = q;
+  
+  % NESTEROV MOMENTUM GD IS IMPLEMENTED BY DEFAULT. TO USE NORMAL GD,
+  % COMMENT OUT THE LINES 126, 127 AND 130. AND UNCOMMENT LINE 128
+   v = 0.9*vprev + (alpha * (tau_ 1 / norm (tau_ 1)));
+   q = q_p + v; 
+   % q = q_p + (alpha * (tau_ 1 / norm (tau_ 1)));
+   [ pos_start , ~] = calculateFK_sol(q);
+   vprev = v;
+   
+% THE BELOW SECTION IS THE RANDOM MOTION ALGORITHM THAT WE IMPLEMENTED. 
+%BY DEFAULT, THE CODE DOES NOT CHECK FOR LOCAL MINIMA AND DOES NOT EXECUTE
+% RANDOM MOTIONS. TO EXECUTE THE RANDOM MOTIONS CODE, UNCOMMENT THE ENTIRE
+% SECTION BELOW
+
+%  if (norm(pos_start(6,:) - pos_eff(6, :)) >= epislon)&&(norm(q-q_p)<0.007)
+%     c=c+1;
+%  end
+%  if c>5   
+%     disp('Stuck in Local Minima')
+%     ca = 1
+%     while norm(q-q_p)<0.3
+%        con = -0.3 + 0.6*rand(1,6);
+%        qn = q + t*ca*con;
+%        q_p = q;
+%        q = qn;
+%        ca=ca+1;
+%        disp('Performing Random motions')
+%     end
+%     c=0;
+%     t=t+1;
+%     fprintf('Stuck in Local minima for % d times.\n', t)
+%  end
+
+% PRINTING THE ERROR WITH END-EFFECTOR POSITION
+
+   l = norm(pos_start(6,:) - pos_eff(6, :));
+   fprintf('Difference left in end-effector is % d.\n', l)
+    
+    
+ end
+ disp('Done Planning')
