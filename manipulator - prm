@@ -1,0 +1,267 @@
+tic
+
+%%%% GENERATING VALUES OF JOINT ANGLES FOR THE C-SPACE %%%%%%%%%%%%
+q1 = linspace(-1.7,1.7,10);     
+q2 = linspace(-1.7,1.7,10);
+q3 = linspace(-1.8,1.7,10);
+q4 = linspace(-1.9,1.7,10);
+q5 = linspace(-2,1.5,10);
+c = 1;   % counter for adding total config space
+d = 1;   % COUNTER FOR ADDING THE OBSTACLE SPACE
+rad = 2*10;      % PADDING RADIUS, USING 2CM NOW
+
+mapstruct = map; % ADDING THE MAP TO MAPSTRUCT        
+no_of _obs = size(mapstruct.obstacles,1);   % NUMBER OF OBSTACLES
+
+for ob = 1:no_of _obs          % PADDING THE OBSTACLES WITH THE RADIUS OF CYLINDER
+    mapstruct.obstacles(ob,1) = mapstruct.obstacles(ob,1)-rad;
+    mapstruct.obstacles(ob,2) = mapstruct.obstacles(ob,2)-rad;
+    mapstruct.obstacles(ob,3) = mapstruct.obstacles(ob,3)-rad;
+    mapstruct.obstacles(ob,4) = mapstruct.obstacles(ob,4)+rad;
+    mapstruct.obstacles(ob,5) = mapstruct.obstacles(ob,5)+rad;
+    mapstruct.obstacles(ob,6) = mapstruct.obstacles(ob,6)+rad;
+end
+
+tic
+
+%%%% GENERATING VALUES OF JOINT ANGLES FOR THE C-SPACE %%%%%%%%%%%%
+q1 = linspace(-1.7,1.7,10);     
+q2 = linspace(-1.7,1.7,10);
+q3 = linspace(-1.8,1.7,10);
+q4 = linspace(-1.9,1.7,10);
+q5 = linspace(-2,1.5,10);
+c = 1;   % counter for adding total config space
+d = 1;   % COUNTER FOR ADDING THE OBSTACLE SPACE
+rad = 2*10;      % PADDING RADIUS, USING 2CM NOW
+
+mapstruct = map; % ADDING THE MAP TO MAPSTRUCT        
+no_of _obs = size(mapstruct.obstacles,1);   % NUMBER OF OBSTACLES
+
+for ob = 1:no_of _obs          % PADDING THE OBSTACLES WITH THE RADIUS OF CYLINDER
+    mapstruct.obstacles(ob,1) = mapstruct.obstacles(ob,1)-rad;
+    mapstruct.obstacles(ob,2) = mapstruct.obstacles(ob,2)-rad;
+    mapstruct.obstacles(ob,3) = mapstruct.obstacles(ob,3)-rad;
+    mapstruct.obstacles(ob,4) = mapstruct.obstacles(ob,4)+rad;
+    mapstruct.obstacles(ob,5) = mapstruct.obstacles(ob,5)+rad;
+    mapstruct.obstacles(ob,6) = mapstruct.obstacles(ob,6)+rad;
+end
+
+% Starting the nested for loop. %CONSTRUCTING THE C-SPACE AND OBSTACLE SPACE
+for i=1:10
+    for j=1:10
+        for k=1:10
+            for l=1:10
+                for m=1:10
+                    q = [q1(i),q2(j),q3(k),q4(l),q5(m),0];        
+                    Q(c,:) = q;     % ADDING POINTS TO THE C-SPACE
+                    [We,~] = calculateFK_sol(q);
+                    
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    % THIS IS WHERE OBSTACLE SPACE IS CONSTRUCTED. 
+                    %THE CONDITIONS ARE: 1)IF A JOINT ANGLE CONFIG RESULTS IN
+                    % ANY ONE OF THE LINKS BEING PRESENT INSIDE AN OBSTACLE,
+                    % THEN THAT JOINT ANGLE IS ADDED TO THE OBSTACLE SPACE.
+                    %2) IF ANY JOINT ANGLE RESULTS IN A LINK BEING PRESENT
+                    % IN BETWEEN AN OBSTACLE, THEN THAT JOINT ANGLE IS ADDED
+                    % TO THE OBSTACLE SPACE.
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    for ob = 1:no_of _obs
+                        if (mapstruct.obstacles(ob,1)<We(6,1))&&(We(6,1)<mapstruct.obstacles(ob,4))&&(mapstruct.obstacles(ob,2)<We(6,2))&&(We(6,2)<mapstruct.obstacles(ob,5))&&(mapstruct.obstacles(ob,3)<We(6,3))&&(We(6,3)<mapstruct.obstacles(ob,6))
+                            Qobs(d,:) = q;   % ADDING POINTS TO OBSTACLE SPACE
+                            
+                            d = d+1;
+                            break
+                        elseif (mapstruct.obstacles(ob,1)<We(5,1))&&(We(5,1)<mapstruct.obstacles(ob,4))&&(mapstruct.obstacles(ob,2)<We(5,2))&&(We(5,2)<mapstruct.obstacles(ob,5))&&(mapstruct.obstacles(ob,3)<We(5,3))&&(We(5,3)<mapstruct.obstacles(ob,6))
+                            Qobs(d,:) = q;
+                            
+                            d = d+1;
+                            break
+                        elseif (mapstruct.obstacles(ob,1)<We(4,1))&&(We(4,1)<mapstruct.obstacles(ob,4))&&(mapstruct.obstacles(ob,2)<We(4,2))&&(We(4,2)<mapstruct.obstacles(ob,5))&&(mapstruct.obstacles(ob,3)<We(4,3))&&(We(4,3)<mapstruct.obstacles(ob,6))
+                            Qobs(d,:) = q;
+                            
+                            d = d+1;
+                            break
+                        elseif (mapstruct.obstacles(ob,1)<We(3,1))&&(We(3,1)<mapstruct.obstacles(ob,4))&&(mapstruct.obstacles(ob,2)<We(3,2))&&(We(3,2)<mapstruct.obstacles(ob,5))&&(mapstruct.obstacles(ob,3)<We(3,3))&&(We(3,3)<mapstruct.obstacles(ob,6))
+                            Qobs(d,:) = q;
+                           
+                            d = d+1;
+                            break
+                        elseif (mapstruct.obstacles(ob,1)<We(2,1))&&(We(2,1)<mapstruct.obstacles(ob,4))&&(mapstruct.obstacles(ob,2)<We(2,2))&&(We(2,2)<mapstruct.obstacles(ob,5))&&(mapstruct.obstacles(ob,3)<We(2,3))&&(We(2,3)<mapstruct.obstacles(ob,6))
+                            Qobs(d,:) = q;
+                            d = d+1;
+                            break
+                        elseif (mapstruct.obstacles(ob,1)<We(1,1))&&(We(1,1)<mapstruct.obstacles(ob,4))&&(mapstruct.obstacles(ob,2)<We(1,2))&&(We(1,2)<mapstruct.obstacles(ob,5))&&(mapstruct.obstacles(ob,3)<We(1,3))&&(We(1,3)<mapstruct.obstacles(ob,6))
+                            Qobs(d,:) = q;
+                            
+                            d = d+1; 
+                            break
+                        elseif (detectcollision(We(1,:),We(2,:),mapstruct.obstacles(ob,:)))
+                            Qobs(d,:) = q;
+                            
+                            d = d+1;
+                            break
+                        elseif (detectcollision(We(2,:),We(3,:),mapstruct.obstacles(ob,:)))
+                            Qobs(d,:) = q;
+                            
+                            d = d+1;
+                            break
+                        elseif (detectcollision(We(3,:),We(4,:),mapstruct.obstacles(ob,:)))
+                            Qobs(d,:) = q;
+                            
+                            d = d+1;
+                            break
+                        elseif (detectcollision(We(4,:),We(5,:),mapstruct.obstacles(ob,:)))
+                            Qobs(d,:) = q;
+                            
+                            d = d+1;
+                            break
+                        elseif (detectcollision(We(5,:),We(6,:),mapstruct.obstacles(ob,:)))
+                            Qobs(d,:) = q;
+                            
+                            d = d+1;
+                            break
+                        end
+               
+                    end
+                        
+                    c=c+1;      
+                end
+            end
+        end
+    end
+end
+
+% THE CREATION OF THE FREE SPACE IS BASED ON THE DIFFERENCE BETWEEN THE
+% TOTAL C-SPACE AND THE OBSTACLE SPACE.
+
+Qfree = setdiff(Q,Qobs,'rows');
+
+neighbours = zeros(size(newnodes,1),size(newnodes,1)); % DEFINING THE ADJACENCY MATRIX
+
+%%%%%%%%%%%%%%%% PERFORMING THE K NEAREST NEIGHBORS ALGORITHM %%%%%%%%%%%%
+for i = 1 : size(newnodes,1)
+        dist = zeros(size(newnodes,1)-1,2);
+        l=1;    
+        diff = 0;
+        sorted = zeros(size(newnodes,1)-1,2);
+        for j = 1: size(newnodes,1)
+            if ( i ==j ) 
+                continue; 
+            else
+                diff = newnodes( i , :) - newnodes( j , :);
+                dist(l,:) =  [norm(diff),j];
+                l=l+1;
+            end
+        end
+        dist1 = dist(:,1);
+        dist1 = sort(dist1);
+        
+        for tmp=1:size(dist1,1)
+           sorted(tmp,1) = dist1(tmp);
+           c = dist(dist(:,1)==dist1(tmp),2);
+           sorted(tmp,2) = c(1);
+        end
+
+        k=1;
+        count=0;
+        while k<10
+            diff =  newnodes(i,:) - newnodes(sorted(k,2),:);
+            C = setdiff(Qobs,diff,'rows');
+            if size(C,1)==size(Qobs,1)
+                 neighbours(i,sorted(k,2))  = 1;
+                 count = count+1;
+            end
+            k = k+1;
+        end
+        if count==0
+            if i==size(newnodes,1)-1||i==size(newnodes,1)
+                disp('Your start end positions are not connected')
+            end
+        end
+end 
+
+% START OF THE DIJKSTRA ALGORITHM
+n = size(neighbours,1);
+temp = neighbours;
+temp = temp - diag(diag(temp));                 
+[k1,k2] = find(temp);
+E = [k1 k2];     % EDGES DEFINED
+m1 = newnodes;
+Vk1 = m1(E(:,1),:);
+Vk2 = m1(E(:,2),:);
+D = sqrt(sum((Vk1 - Vk2).^2,2));  % COST EVALUATION DONE WITH EUCLIDEAN DISTANCE
+cost = sparse(E(:,1),E(:,2),D,n,n); % COST MATRIX
+      
+paths = num2cell(NaN(1,1));  % DEFINING PATHS 
+
+mat_node = NaN(n,1);
+cost_min = Inf(n,1);
+finalize = false(n,1);
+path = num2cell(NaN(n,1));
+initial = start_idx;
+cost_min(initial) = 0;     % INITIALIZING VALUES AT THE START ID 
+mat_node(initial) = 0;
+finalize(initial) = true;
+path(initial) = {initial};
+ 
+% RUNNING A LOOP UNTIL GOAL ID IS SET
+ while any(~finalize(goal_idx))
+            
+           % CHANGING NODES
+    mat_neigh = mat_node;
+    mat_node(initial) = NaN;
+    idx = find(E(:,1) == initial);
+            
+            % LOOKING AT ALL CONNECTED EDGES TO THE NODE AND SELECTING PATH
+    for l = 1:length(idx)
+       neigh = E(idx(l),2);
+       if ~finalize(neigh)
+           c = cost(initial,neigh);
+           if isnan(mat_neigh(neigh)) || (mat_neigh(neigh) > (mat_neigh(initial) + c))
+               mat_node(neigh) = mat_neigh(initial) + c;
+               path{neigh} = [path{initial} neigh];
+           else
+               mat_node(neigh) = mat_neigh(neigh);
+           end
+        end
+    end
+     
+    % SETTING TO A NEW NODE
+     z = find(~isnan(mat_node));
+     if isempty(z)
+        break
+     else
+        [~,d] = min(mat_node(z));
+        initial = z(d);
+        cost_min(initial) = mat_node(initial);
+        finalize(initial) = true;
+     end
+end
+
+paths = path(goal_idx);
+path1 = paths{1}     % INDICES OF THE JOINT ANGLES IN THE SAMPLED SPACE (WAYPOINTS)
+path1 = newnodes(path1(1,:),:);      % ACTUAL JOINT ANGLES
+path1 = path1(:,1:5);     
+
+nodes = path1;
+
+% INTERPOLATING WAYPOINTS USING A LINEAR FIT
+direction= [];
+path = [];
+for j = 1 : size(nodes,1)-1
+    N = cast(norm (nodes(j,:) - nodes(j+1,:))/0.03,'uint32');
+    factor = linspace( 0,1,N);
+    pt  =zeros(5,size(factor,2));
+    for i = 1: 5 
+        pt(i,:) = nodes(j,i)  + factor.*( nodes(j+1,i) - nodes(j,i));
+        
+    end 
+    path= [path; pt'];     % FINAL SET OF JOINT ANGLES THAT ARE GIVEN AS OUTPUT
+
+end
+toc
+    
+ 
+
+
+
