@@ -1,7 +1,8 @@
 ![consatnt](https://user-images.githubusercontent.com/25079132/51848698-10bda100-22ec-11e9-9232-de574d5ca45e.jpg)
+![spiral](https://user-images.githubusercontent.com/25079132/51848948-a5c09a00-22ec-11e9-9495-6a131a4f687d.jpg)
 
 
-he scripts 
+The scripts 
 
 FK_Velocity takes in q and qdot and returns the e_Vel 
 
