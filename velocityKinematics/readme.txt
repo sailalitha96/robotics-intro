@@ -31,3 +31,6 @@ The independent joints file can be modifed to check which trajectory a given joi
 7. File - constantqdot 
 
 This file provides a plot of the closed loop structure that the end effector takes when all the joint velocoties are constant. 
+
+![alt text](https://raw.githubusercontent.com/sailalitha96/robotics-intro/edit/master/velocityKinematics/spiral.jpg)
+
