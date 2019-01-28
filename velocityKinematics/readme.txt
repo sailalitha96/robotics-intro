@@ -32,5 +32,5 @@ The independent joints file can be modifed to check which trajectory a given joi
 
 This file provides a plot of the closed loop structure that the end effector takes when all the joint velocoties are constant. 
 
-https://github.com/sailalitha96/robotics-intro/blob/master/velocityKinematics/consatnt.jpg
+[[https://github.com/sailalitha96/robotics-intro/blob/master/velocityKinematics/consatnt.jpg]]
 
